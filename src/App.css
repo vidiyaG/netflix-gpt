@@ -43,6 +43,6 @@
 }
 
 .login-container {
-    background-image: url("../public/images/netfilx_background.svg");
+    /* background-image: url("../public/images/netfilx_background.svg"); */
     background-size: cover;
 }

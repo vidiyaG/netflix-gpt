@@ -1,7 +1,12 @@
-import React from "react";
+import React, { useEffect } from "react";
+import Header from "./Header";
 
 function Home() {
-    return <div>Home</div>;
+    return (
+        <div>
+            <Header></Header>
+        </div>
+    );
 }
 
 export default Home;

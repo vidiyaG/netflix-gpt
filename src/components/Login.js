@@ -1,13 +1,27 @@
-import React from "react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useFirebaseAuth } from "../utils/firebase";
+import { emailValidator, passwordValidator } from "../utils/input-validations";
+import { ToastContainer } from "react-toastify";
+import React, { useEffect } from "react";
+
 const Login = () => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [email, setEmail] = useState("");
     const [isLoginMode, setLoginMode] = useState(true);
+    const [errors, setErrors] = useState({
+        email: null,
+        username: null,
+        password: null,
+    });
     const navigate = useNavigate();
+    const { signup, signin, authChanges } = useFirebaseAuth();
     // const [username,setUsername] = useState("")
+
+    useEffect(() => {
+        const unSubscribeCb = authChanges();
+    }, []);
 
     const renderUsernameField = () => {
         return !isLoginMode ? (
@@ -22,6 +36,11 @@ const Login = () => {
                     value={username}
                     onChange={onChangeUsername}
                 />
+                {errors.username && (
+                    <p className="text-red-500 hover:text-red-600">
+                        {errors.username}
+                    </p>
+                )}
             </div>
         ) : null;
     };
@@ -38,6 +57,9 @@ const Login = () => {
                     value={password}
                     onChange={onChangePassword}
                 />
+                <p className="text-red-500 hover:text-red-600">
+                    {errors.password}
+                </p>
             </div>
         );
     };
@@ -55,37 +77,72 @@ const Login = () => {
                     value={email}
                     onChange={onChangeEmail}
                 />
+                <p className="text-red-500 hover:text-red-600">
+                    {errors.email}
+                </p>
             </div>
         );
     };
     const onChangePassword = (event) => {
         setPassword(event.target.value);
+        // if (!isLoginMode) {
+        setErrors({
+            ...errors,
+            password: passwordValidator(event.target.value),
+        });
+        // }
     };
     const onChangeUsername = (event) => {
         setUsername(event?.target?.value);
+        // setErrors({
+        //     ...errors,
+        //     username: usernameValidator(event?.target?.value),
+        // });
     };
     const onChangeEmail = (event) => {
         setEmail(event?.target?.value);
+        setErrors({
+            ...errors,
+            email: emailValidator(event?.target?.value),
+        });
     };
 
     const onSubmit = () => {
         //TODO: authenticate user and store the profile details;protect routes auto-redirect user to home if loggedin;auto redirect to login if loggedOut
-        navigate("home");
+
+        if (isLoginMode) {
+            if (!errors.email && email && password) {
+                signin(email, password);
+            }
+        } else {
+            if (
+                !errors.email &&
+                !errors.password &&
+                !errors.username &&
+                email &&
+                password &&
+                username
+            ) {
+                console.log("call start");
+                signup(email, password, username);
+            }
+        }
     };
     const toggleMode = () => {
         setLoginMode(!isLoginMode);
     };
     return (
-        <div className="login-container h-full w-full px-6 py-4">
+        <div className="login-container h-full w-full p-8 text-white bg-black sm:bg-[url('../public/images/netfilx_background.svg')]">
             <form action="">
                 <section>
-                    <h1 className="text-[#E50014] text-3xl text-left font-bold">
-                        NETFLIX
-                    </h1>
-                    {/* <img src="/images/netflix-app-icon.jpg" alt="logo" /> */}
+                    <img
+                        className="max-w-32 sm:max-w-48"
+                        src="/images/Netflix_Logo.png"
+                        alt="logo"
+                    />
                 </section>
-                <div className="opacity-90 m-auto mt-[10vh] p-8 text-white  bg-[#000000b3] w-[356px]  flex flex-col justify-between rounded-2xl border border-zinc-900	">
-                    <h1 className="font-bold text-center text-3xl ">
+                <div className="opacity-90 m-auto mt-[4vh] sm:mt-[1vh] py-8 sm:px-8 text-white  bg-[#000000b3] w-full sm:w-[356px] flex flex-col justify-between rounded-2xl sm:border border-zinc-900	">
+                    <h1 className="font-bold sm:text-center text-3xl ">
                         {isLoginMode ? "Login" : "Sign Up"}
                     </h1>
                     {/* <h1 className="text-center text-3xl">
@@ -97,7 +154,7 @@ const Login = () => {
                     {renderPasswordField()}
                     <button
                         type="button"
-                        className="bg-[#E50014] h-[40px] my-4"
+                        className="bg-[#E50014]  hover:bg-red-700 h-[40px] my-8"
                         onClick={onSubmit}
                     >
                         {isLoginMode ? "Login" : "Sign Up"}
@@ -114,6 +171,7 @@ const Login = () => {
                         >
                             {isLoginMode ? " Sign up." : "Login"}
                         </button>
+                        <ToastContainer />
                     </p>
                 </div>
             </form>
