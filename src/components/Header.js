@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useFirebaseAuth } from "../utils/firebase";
 
 const Header = () => {
-    const { authChanges } = useFirebaseAuth();
+    const { authChanges, signout } = useFirebaseAuth();
     useEffect(() => {
         authChanges();
     }, []);
@@ -21,8 +21,9 @@ const Header = () => {
                         <Link to="/">Home</Link>
                     </li>
                     <li>
-                        <Link to="/login">Login</Link>
+                        <Link to="/popular">Popular</Link>
                     </li>
+                    <button onClick={() => signout()}>Logout</button>
                 </ul>
             </section>
         </div>
